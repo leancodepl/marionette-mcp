@@ -176,20 +176,20 @@ Once connected, the AI agent has access to these tools:
 
 | Tool | Description |
 |------|-------------|
-| `app.connect` | Connect to a Flutter app via its VM service URI (e.g., `ws://127.0.0.1:54321/ws`). |
-| `app.disconnect` | Disconnect from the currently connected app. |
-| `app.get_interactive_elements` | Returns a list of all interactive UI elements (buttons, inputs, etc.) visible on screen. |
-| `app.tap` | Taps an element matching a specific key or visible text. |
-| `app.enter_text` | Enters text into a text field matching a key. |
-| `app.scroll_to` | Scrolls the view until an element matching a key or text becomes visible. |
-| `app.get_logs` | Retrieves application logs collected since the last check. |
-| `app.take_screenshots` | Captures screenshots of all active views and returns them as base64 images. |
+| `marionette.connect` | Connect to a Flutter app via its VM service URI (e.g., `ws://127.0.0.1:54321/ws`). |
+| `marionette.disconnect` | Disconnect from the currently connected app. |
+| `marionette.get_interactive_elements` | Returns a list of all interactive UI elements (buttons, inputs, etc.) visible on screen. |
+| `marionette.tap` | Taps an element matching a specific key or visible text. |
+| `marionette.enter_text` | Enters text into a text field matching a key. |
+| `marionette.scroll_to` | Scrolls the view until an element matching a key or text becomes visible. |
+| `marionette.get_logs` | Retrieves application logs collected since the last check. |
+| `marionette.take_screenshots` | Captures screenshots of all active views and returns them as base64 images. |
 
 ## How It Works
 
 1.  **Initialization**: Your Flutter app initializes `MarionetteBinding`, which registers custom VM service extensions (`ext.flutter.marionette.*`).
 2.  **Connection**: The MCP server connects to your app's VM Service URL.
-3.  **Interaction**: When an AI agent calls a tool (like `app.tap`), the MCP server translates this into a call to the corresponding VM service extension in your app.
+3.  **Interaction**: When an AI agent calls a tool (like `marionette.tap`), the MCP server translates this into a call to the corresponding VM service extension in your app.
 4.  **Execution**: The Flutter app executes the action (e.g., simulates a tap gesture) and returns the result.
 
 ```mermaid
@@ -199,17 +199,17 @@ sequenceDiagram
     participant VM as VM Service
     participant App as Flutter App
 
-    Agent->>MCP: app.connect(uri)
+    Agent->>MCP: marionette.connect(uri)
     MCP->>VM: Connect to ws://...
     VM->>App: Verify marionette extensions
     App-->>Agent: Connected
     
-    Agent->>MCP: app.get_interactive_elements()
+    Agent->>MCP: marionette.get_interactive_elements()
     MCP->>VM: ext.flutter.marionette.interactiveElements
     VM->>App: Query widget tree
     App-->>Agent: List of elements
     
-    Agent->>MCP: app.tap(key: "login-button")
+    Agent->>MCP: marionette.tap(key: "login-button")
     MCP->>VM: ext.flutter.marionette.tap
     VM->>App: Simulate tap gesture
     App-->>Agent: Success
@@ -217,7 +217,7 @@ sequenceDiagram
 
 ## Troubleshooting
 
--   **"Not connected to any app"**: Ensure the AI agent has called `app.connect` with the valid VM Service URI before using other tools.
+-   **"Not connected to any app"**: Ensure the AI agent has called `marionette.connect` with the valid VM Service URI before using other tools.
 -   **Finding the URI**: Run your Flutter app in debug mode (`flutter run`). Look for a line like: `The Flutter DevTools debugger and profiler on iPhone 15 Pro is available at: http://127.0.0.1:9101?uri=ws://127.0.0.1:9101/ws`. Use the `ws://...` part.
 -   **Release Mode**: Marionette only works in debug (and profile) mode because it relies on the VM Service. It will not work in release builds.
 -   **Elements not found**: Ensure your widgets are visible. If using custom widgets, make sure they are configured in `MarionetteConfiguration`.
