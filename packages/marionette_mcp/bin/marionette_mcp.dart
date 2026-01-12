@@ -72,7 +72,7 @@ Future<int> main(List<String> arguments) async {
 
     final server = McpServer(
       const Implementation(name: 'marionette-mcp', version: version),
-      options: const ServerOptions(
+      options: const McpServerOptions(
         capabilities: ServerCapabilities(
           tools: ServerCapabilitiesTools(),
         ),

@@ -17,37 +17,36 @@ final class VmServiceContext {
   void registerTools(McpServer server) {
     // Connection management tools
     server
-      ..tool(
+      ..registerTool(
         'marionette.connect',
         description:
             'Connects to a Flutter app via its VM service URI. This must be called before using any other marionette.* tools. The VM service URI is typically in the format ws://127.0.0.1:PORT/ws and can be found in the Flutter app output when running in debug mode.',
         annotations: const ToolAnnotations(
           title: 'Connect to App',
         ),
-        toolInputSchema: const ToolInputSchema(
+        inputSchema: ToolInputSchema(
           properties: {
-            'uri': {
-              'type': 'string',
-              'description':
+            'uri': JsonSchema.string(
+              description:
                   'VM service URI (e.g., ws://127.0.0.1:8181/ws). This is printed in the Flutter app console when running in debug mode.',
-            },
+            ),
           },
           required: ['uri'],
         ),
-        callback: ({args, extra}) async {
-          final uri = args!['uri'] as String;
+        callback: (args, extra) async {
+          final uri = args['uri'] as String;
           _logger.info('Connecting to app at $uri');
 
           try {
             await connector.connect(uri);
-            return CallToolResult.fromContent(
+            return CallToolResult(
               content: [
                 TextContent(text: 'Successfully connected to app at $uri'),
               ],
             );
           } catch (err) {
             _logger.severe('Failed to connect to app', err);
-            return CallToolResult.fromContent(
+            return CallToolResult(
               isError: true,
               content: [
                 TextContent(
@@ -58,27 +57,27 @@ final class VmServiceContext {
           }
         },
       )
-      ..tool(
+      ..registerTool(
         'marionette.disconnect',
         description:
             'Disconnects from the currently connected Flutter app. After disconnecting, you must call marionette.connect again to use any marionette.* tools.',
         annotations: const ToolAnnotations(
           title: 'Disconnect from App',
         ),
-        toolInputSchema: const ToolInputSchema(properties: {}),
-        callback: ({args, extra}) async {
+        inputSchema: const ToolInputSchema(properties: {}),
+        callback: (args, extra) async {
           _logger.info('Disconnecting from app');
 
           try {
             await connector.disconnect();
-            return CallToolResult.fromContent(
+            return CallToolResult(
               content: [
                 const TextContent(text: 'Successfully disconnected from app'),
               ],
             );
           } catch (err) {
             _logger.severe('Error during disconnect', err);
-            return CallToolResult.fromContent(
+            return CallToolResult(
               isError: true,
               content: [
                 TextContent(
@@ -90,7 +89,7 @@ final class VmServiceContext {
         },
       )
       // Interactive elements inspection
-      ..tool(
+      ..registerTool(
         'marionette.get_interactive_elements',
         description:
             'Returns a list of all interactive elements currently visible in the Flutter app UI tree. Each element includes its type, text content (if any), key (if any), and other identifying properties. This is useful for understanding what can be interacted with in the app. Requires an active connection established via marionette.connect.',
@@ -99,8 +98,8 @@ final class VmServiceContext {
           readOnlyHint: true,
           idempotentHint: true,
         ),
-        toolInputSchema: const ToolInputSchema(properties: {}),
-        callback: ({args, extra}) async {
+        inputSchema: const ToolInputSchema(properties: {}),
+        callback: (args, extra) async {
           _logger.info('Getting interactive elements');
 
           try {
@@ -115,14 +114,14 @@ final class VmServiceContext {
               buffer.writeln(_formatElement(element as Map<String, dynamic>));
             }
 
-            return CallToolResult.fromContent(
+            return CallToolResult(
               content: [
                 TextContent(text: buffer.toString()),
               ],
             );
           } catch (err) {
             _logger.warning('Failed to get interactive elements', err);
-            return CallToolResult.fromContent(
+            return CallToolResult(
               isError: true,
               content: [
                 TextContent(text: err.toString()),
@@ -132,28 +131,26 @@ final class VmServiceContext {
         },
       )
       // Tap interaction
-      ..tool(
+      ..registerTool(
         'marionette.tap',
         description:
             'Simulates a tap gesture on an element in the Flutter app that matches the given criteria. You can match elements by their key (a ValueKey<String>) or by their visible text content. Only one of key or text should be provided. Requires an active connection established via marionette.connect.',
         annotations: const ToolAnnotations(
           title: 'Tap Element',
         ),
-        toolInputSchema: const ToolInputSchema(
+        inputSchema: ToolInputSchema(
           properties: {
-            'key': {
-              'type': 'string',
-              'description':
+            'key': JsonSchema.string(
+              description:
                   'The key of the element to tap. You can get the key of an element by calling marionette.get_interactive_elements.',
-            },
-            'text': {
-              'type': 'string',
-              'description':
+            ),
+            'text': JsonSchema.string(
+              description:
                   'The visible text content of the element to tap. Use this for elements that display text like buttons or labels.',
-            },
+            ),
           },
         ),
-        callback: ({args, extra}) async {
+        callback: (args, extra) async {
           final matcher = _buildMatcher(args);
           _logger.info('Tapping element with matcher: $matcher');
 
@@ -161,7 +158,7 @@ final class VmServiceContext {
             final response = await connector.tapElement(matcher);
             final message = response['message'] as String?;
 
-            return CallToolResult.fromContent(
+            return CallToolResult(
               content: [
                 TextContent(
                   text: message ?? 'Successfully tapped element',
@@ -170,7 +167,7 @@ final class VmServiceContext {
             );
           } catch (err) {
             _logger.warning('Failed to tap element', err);
-            return CallToolResult.fromContent(
+            return CallToolResult(
               isError: true,
               content: [
                 TextContent(text: err.toString()),
@@ -180,29 +177,27 @@ final class VmServiceContext {
         },
       )
       // Text input
-      ..tool(
+      ..registerTool(
         'marionette.enter_text',
         description:
             'Enters text into a text field in the Flutter app that matches the given criteria. This simulates typing text into the field. Requires an active connection established via marionette.connect.',
         annotations: const ToolAnnotations(
           title: 'Enter Text',
         ),
-        toolInputSchema: const ToolInputSchema(
+        inputSchema: ToolInputSchema(
           properties: {
-            'input': {
-              'type': 'string',
-              'description': 'The text to enter into the text field.',
-            },
-            'key': {
-              'type': 'string',
-              'description':
+            'input': JsonSchema.string(
+              description: 'The text to enter into the text field.',
+            ),
+            'key': JsonSchema.string(
+              description:
                   'The key of the text field. You can get the key of an element by calling marionette.get_interactive_elements.',
-            },
+            ),
           },
           required: ['input', 'key'],
         ),
-        callback: ({args, extra}) async {
-          final input = args!['input'] as String;
+        callback: (args, extra) async {
+          final input = args['input'] as String;
           final matcher = _buildMatcher(args);
           _logger.info('Entering text into element with matcher: $matcher');
 
@@ -210,7 +205,7 @@ final class VmServiceContext {
             final response = await connector.enterText(matcher, input);
             final message = response['message'] as String?;
 
-            return CallToolResult.fromContent(
+            return CallToolResult(
               content: [
                 TextContent(
                   text: message ?? 'Successfully entered text',
@@ -219,7 +214,7 @@ final class VmServiceContext {
             );
           } catch (err) {
             _logger.warning('Failed to enter text', err);
-            return CallToolResult.fromContent(
+            return CallToolResult(
               isError: true,
               content: [
                 TextContent(text: err.toString()),
@@ -229,28 +224,26 @@ final class VmServiceContext {
         },
       )
       // Scroll to element
-      ..tool(
+      ..registerTool(
         'marionette.scroll_to',
         description:
             'Scrolls the view until an element matching the given criteria becomes visible. You can match elements by their key (a ValueKey<String>) or by their visible text content. This is useful when you need to interact with elements that are not currently visible on screen. Requires an active connection established via marionette.connect.',
         annotations: const ToolAnnotations(
           title: 'Scroll to Element',
         ),
-        toolInputSchema: const ToolInputSchema(
+        inputSchema: ToolInputSchema(
           properties: {
-            'key': {
-              'type': 'string',
-              'description':
+            'key': JsonSchema.string(
+              description:
                   'The key of the element to scroll to. You can get the key of an element by calling marionette.get_interactive_elements.',
-            },
-            'text': {
-              'type': 'string',
-              'description':
+            ),
+            'text': JsonSchema.string(
+              description:
                   'The visible text content of the element to scroll to.',
-            },
+            ),
           },
         ),
-        callback: ({args, extra}) async {
+        callback: (args, extra) async {
           final matcher = _buildMatcher(args);
           _logger.info('Scrolling to element with matcher: $matcher');
 
@@ -258,7 +251,7 @@ final class VmServiceContext {
             final response = await connector.scrollToElement(matcher);
             final message = response['message'] as String?;
 
-            return CallToolResult.fromContent(
+            return CallToolResult(
               content: [
                 TextContent(
                   text: message ?? 'Successfully scrolled to element',
@@ -267,7 +260,7 @@ final class VmServiceContext {
             );
           } catch (err) {
             _logger.warning('Failed to scroll to element', err);
-            return CallToolResult.fromContent(
+            return CallToolResult(
               isError: true,
               content: [
                 TextContent(text: err.toString()),
@@ -277,7 +270,7 @@ final class VmServiceContext {
         },
       )
       // Get logs
-      ..tool(
+      ..registerTool(
         'marionette.get_logs',
         description:
             'Retrieves all application logs collected from the Flutter app since connection or since the last log retrieval. This includes debug messages, errors, and other log output from the running app. Requires an active connection established via marionette.connect.',
@@ -285,8 +278,8 @@ final class VmServiceContext {
           title: 'Get Application Logs',
           readOnlyHint: true,
         ),
-        toolInputSchema: const ToolInputSchema(properties: {}),
-        callback: ({args, extra}) async {
+        inputSchema: const ToolInputSchema(properties: {}),
+        callback: (args, extra) async {
           _logger.info('Getting application logs');
 
           try {
@@ -295,7 +288,7 @@ final class VmServiceContext {
             final count = response['count'] as int;
 
             if (count == 0) {
-              return CallToolResult.fromContent(
+              return CallToolResult(
                 content: [
                   const TextContent(text: 'No logs collected'),
                 ],
@@ -311,14 +304,14 @@ final class VmServiceContext {
               buffer.writeln(log);
             }
 
-            return CallToolResult.fromContent(
+            return CallToolResult(
               content: [
                 TextContent(text: buffer.toString()),
               ],
             );
           } catch (err) {
             _logger.warning('Failed to get logs', err);
-            return CallToolResult.fromContent(
+            return CallToolResult(
               isError: true,
               content: [
                 TextContent(text: err.toString()),
@@ -328,7 +321,7 @@ final class VmServiceContext {
         },
       )
       // Take screenshots
-      ..tool(
+      ..registerTool(
         'marionette.take_screenshots',
         description:
             'Takes screenshots of all views in the Flutter app. Returns base64-encoded PNG images that can be decoded and saved. This captures the current visual state of the app. Requires an active connection established via marionette.connect.',
@@ -336,8 +329,8 @@ final class VmServiceContext {
           title: 'Take Screenshots',
           readOnlyHint: true,
         ),
-        toolInputSchema: const ToolInputSchema(properties: {}),
-        callback: ({args, extra}) async {
+        inputSchema: const ToolInputSchema(properties: {}),
+        callback: (args, extra) async {
           _logger.info('Taking screenshots');
 
           try {
@@ -346,13 +339,13 @@ final class VmServiceContext {
                 (response['screenshots'] as List<dynamic>).cast<String>();
 
             if (screenshots.isEmpty) {
-              return CallToolResult.fromContent(
+              return CallToolResult(
                 content: [
                   const TextContent(text: 'No screenshots captured'),
                 ],
               );
             } else {
-              return CallToolResult.fromContent(
+              return CallToolResult(
                   content: screenshots
                       .map((screenshot) =>
                           ImageContent(data: screenshot, mimeType: 'image/png'))
@@ -360,7 +353,7 @@ final class VmServiceContext {
             }
           } catch (err) {
             _logger.warning('Failed to take screenshots', err);
-            return CallToolResult.fromContent(
+            return CallToolResult(
               isError: true,
               content: [
                 TextContent(text: err.toString()),
@@ -372,11 +365,7 @@ final class VmServiceContext {
   }
 
   /// Builds a widget matcher map from tool arguments.
-  Map<String, dynamic> _buildMatcher(Map<String, dynamic>? args) {
-    if (args == null) {
-      return {};
-    }
-
+  Map<String, dynamic> _buildMatcher(Map<String, dynamic> args) {
     final matcher = <String, dynamic>{};
     if (args.containsKey('key')) {
       matcher['key'] = args['key'];
