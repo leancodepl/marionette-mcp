@@ -199,11 +199,14 @@ class VmServiceConnector {
 
   /// Taps an element matching the given criteria.
   ///
-  /// [matcher] should contain either 'key' or 'text' field.
+  /// [matcher] should contain one of:
+  /// - 'key': matches by ValueKey<String>
+  /// - 'text': matches by visible text content
+  /// - 'type': matches by widget type name
+  /// - 'x' and 'y': screen coordinates for tapping at a specific position
+  ///
   /// Throws [NotConnectedException] if not connected.
-  Future<Map<String, dynamic>> tapElement(
-    Map<String, dynamic> matcher,
-  ) {
+  Future<Map<String, dynamic>> tap(Map<String, dynamic> matcher) {
     return _callExtension('marionette.tap', matcher);
   }
 

@@ -9,10 +9,13 @@ sealed class WidgetMatcher {
   bool matches(Widget widget, MarionetteConfiguration configuration);
 
   /// Creates a matcher from a JSON map.
-  /// If multiple fields are present, precedence is: 'key' > 'text' > 'type'.
+  /// If multiple fields are present, precedence is:
+  /// coordinates (x & y) > 'key' > 'text' > 'type'.
   static WidgetMatcher fromJson(Map<String, dynamic> json) {
-    // Key has precedence over text, text has precedence over type
-    if (json.containsKey('key')) {
+    // Coordinates have highest precedence (fast path, no widget search)
+    if (json.containsKey('x') && json.containsKey('y')) {
+      return CoordinatesMatcher.fromJson(json);
+    } else if (json.containsKey('key')) {
       return KeyMatcher.fromJson(json);
     } else if (json.containsKey('text')) {
       return TextMatcher.fromJson(json);
@@ -20,13 +23,44 @@ sealed class WidgetMatcher {
       return TypeStringMatcher.fromJson(json);
     } else {
       throw ArgumentError(
-        'Matcher JSON must contain either "key", "text", or "type" field',
+        'Matcher JSON must contain "x" & "y", "key", "text", or "type" field',
       );
     }
   }
 
   /// Converts this matcher to a JSON-serializable map.
   Map<String, dynamic> toJson();
+}
+
+/// Matches by screen coordinates. This is a special matcher that doesn't
+/// actually match widgets - it's used as a fast path for tapping at
+/// specific screen positions without searching the widget tree.
+class CoordinatesMatcher extends WidgetMatcher {
+  const CoordinatesMatcher(this.x, this.y);
+
+  factory CoordinatesMatcher.fromJson(Map<String, dynamic> json) {
+    return CoordinatesMatcher(
+      double.parse(json['x'] as String),
+      double.parse(json['y'] as String),
+    );
+  }
+
+  final double x;
+  final double y;
+
+  Offset get offset => Offset(x, y);
+
+  @override
+  bool matches(Widget widget, MarionetteConfiguration configuration) {
+    // CoordinatesMatcher doesn't match widgets - it's handled specially
+    // in GestureDispatcher.tap() as a fast path.
+    return false;
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{'x': x, 'y': y};
+  }
 }
 
 /// Matches widgets by their ValueKey<String> key.

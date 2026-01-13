@@ -12,21 +12,30 @@ class GestureDispatcher {
   int _nextPointerId = 1;
 
   /// Simulates a tap on an element that matches the given [matcher].
+  ///
+  /// If [matcher] is a [CoordinatesMatcher], taps directly at the specified
+  /// coordinates without searching the widget tree (fast path).
   Future<void> tap(
     WidgetMatcher matcher,
     WidgetFinder widgetFinder,
     MarionetteConfiguration configuration,
   ) async {
+    // Fast path for coordinate-based tapping
+    if (matcher is CoordinatesMatcher) {
+      await _dispatchTapAtPosition(matcher.offset);
+      return;
+    }
+
     final element = widgetFinder.findElement(matcher, configuration);
 
     if (element == null) {
       throw Exception('Element matching ${matcher.toJson()} not found');
     } else {
-      await _dispatchTap(element);
+      await _dispatchTapAtElement(element);
     }
   }
 
-  Future<void> _dispatchTap(Element element) async {
+  Future<void> _dispatchTapAtElement(Element element) async {
     final renderObject = element.renderObject;
 
     if (renderObject is! RenderBox) {
@@ -41,6 +50,10 @@ class GestureDispatcher {
     final center = renderObject.size.center(Offset.zero);
     final globalPosition = renderObject.localToGlobal(center);
 
+    await _dispatchTapAtPosition(globalPosition);
+  }
+
+  Future<void> _dispatchTapAtPosition(Offset globalPosition) async {
     final pointerId = _nextPointerId++;
 
     // Build the event records

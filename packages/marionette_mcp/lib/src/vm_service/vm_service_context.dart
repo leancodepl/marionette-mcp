@@ -134,7 +134,7 @@ final class VmServiceContext {
       ..registerTool(
         'tap',
         description:
-            'Simulates a tap gesture on an element in the Flutter app that matches the given criteria. You can match elements by their key (a ValueKey<String>), by their text content (but not accessibility!), or by their widget type. Only one of key, text, or type should be provided. Prefer using the key if available, as it is more reliable. Limit yourself to elements from get_interactive_elements only if you can. Requires an active connection established via connect.',
+            'Simulates a tap gesture on an element in the Flutter app that matches the given criteria. You can match elements by their key (a ValueKey<String>), by their text content (but not accessibility!), by their widget type, or by screen coordinates. Only one matching method should be used: either key, text, type, or coordinates. Prefer using the key if available, as it is more reliable. Limit yourself to elements from get_interactive_elements only if you can. Requires an active connection established via connect.',
         annotations: const ToolAnnotations(
           title: 'Tap Element',
         ),
@@ -152,25 +152,39 @@ final class VmServiceContext {
               description:
                   'The widget type name of the element to tap (e.g., "ElevatedButton", "IconButton"). Use this to match elements by their Flutter widget type.',
             ),
+            'coordinates': JsonSchema.object(
+              description:
+                  'Screen coordinates to tap at. Use this to tap at a specific position on the screen.',
+              properties: {
+                'x': JsonSchema.number(
+                  description:
+                      'The x coordinate (horizontal position from left).',
+                ),
+                'y': JsonSchema.number(
+                  description: 'The y coordinate (vertical position from top).',
+                ),
+              },
+              required: ['x', 'y'],
+            ),
           },
         ),
         callback: (args, extra) async {
           final matcher = _buildMatcher(args);
-          _logger.info('Tapping element with matcher: $matcher');
+          _logger.info('Tapping with matcher: $matcher');
 
           try {
-            final response = await connector.tapElement(matcher);
+            final response = await connector.tap(matcher);
             final message = response['message'] as String?;
 
             return CallToolResult(
               content: [
                 TextContent(
-                  text: message ?? 'Successfully tapped element',
+                  text: message ?? 'Successfully tapped',
                 ),
               ],
             );
           } catch (err) {
-            _logger.warning('Failed to tap element', err);
+            _logger.warning('Failed to tap', err);
             return CallToolResult(
               isError: true,
               content: [
@@ -416,6 +430,11 @@ final class VmServiceContext {
   /// Builds a widget matcher map from tool arguments.
   Map<String, dynamic> _buildMatcher(Map<String, dynamic> args) {
     final matcher = <String, dynamic>{};
+    // Flatten coordinates for VM service (which only supports string->string)
+    if (args['coordinates'] case final Map<String, dynamic> coordinates) {
+      matcher['x'] = coordinates['x'];
+      matcher['y'] = coordinates['y'];
+    }
     if (args.containsKey('key')) {
       matcher['key'] = args['key'];
     }
