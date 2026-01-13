@@ -72,11 +72,10 @@ class MarionetteBinding extends WidgetsFlutterBinding {
       callback: (params) async {
         try {
           final elements = _elementTreeFinder.findInteractiveElements();
-
-          return <String, dynamic>{'type': 'Success', 'elements': elements};
+          return <String, dynamic>{'status': 'Success', 'elements': elements};
         } catch (err, st) {
           return <String, dynamic>{
-            'type': 'Error',
+            'status': 'Error',
             'error': err.toString(),
             'stackTrace': st.toString(),
           };
@@ -93,12 +92,12 @@ class MarionetteBinding extends WidgetsFlutterBinding {
           await _gestureDispatcher.tap(matcher, _widgetFinder, configuration);
 
           return <String, dynamic>{
-            'type': 'Success',
+            'status': 'Success',
             'message': 'Tapped element matching: ${matcher.toJson()}',
           };
         } catch (err, st) {
           return <String, dynamic>{
-            'type': 'Error',
+            'status': 'Error',
             'error': err.toString(),
             'stackTrace': st.toString(),
           };
@@ -116,7 +115,7 @@ class MarionetteBinding extends WidgetsFlutterBinding {
 
           if (input == null) {
             return <String, dynamic>{
-              'type': 'Error',
+              'status': 'Error',
               'error': 'Missing required parameter: input',
             };
           }
@@ -124,13 +123,13 @@ class MarionetteBinding extends WidgetsFlutterBinding {
           await _textInputSimulator.enterText(matcher, input, configuration);
 
           return <String, dynamic>{
-            'type': 'Success',
+            'status': 'Success',
             'message':
                 'Entered text into element matching: ${matcher.toJson()}',
           };
         } catch (err, st) {
           return <String, dynamic>{
-            'type': 'Error',
+            'status': 'Error',
             'error': err.toString(),
             'stackTrace': st.toString(),
           };
@@ -148,12 +147,12 @@ class MarionetteBinding extends WidgetsFlutterBinding {
           await _scrollSimulator.scrollUntilVisible(matcher, configuration);
 
           return <String, dynamic>{
-            'type': 'Success',
+            'status': 'Success',
             'message': 'Scrolled to element matching: ${matcher.toJson()}',
           };
         } catch (err, st) {
           return <String, dynamic>{
-            'type': 'Error',
+            'status': 'Error',
             'error': err.toString(),
             'stackTrace': st.toString(),
           };
@@ -169,13 +168,13 @@ class MarionetteBinding extends WidgetsFlutterBinding {
           final logs = _logCollector.getFormattedLogs();
 
           return <String, dynamic>{
-            'type': 'Success',
+            'status': 'Success',
             'logs': logs,
             'count': logs.length,
           };
         } catch (err, st) {
           return <String, dynamic>{
-            'type': 'Error',
+            'status': 'Error',
             'error': err.toString(),
             'stackTrace': st.toString(),
           };
@@ -191,12 +190,12 @@ class MarionetteBinding extends WidgetsFlutterBinding {
           final screenshots = await _screenshotService.takeScreenshots();
 
           return <String, dynamic>{
-            'type': 'Success',
+            'status': 'Success',
             'screenshots': screenshots,
           };
         } catch (err, st) {
           return <String, dynamic>{
-            'type': 'Error',
+            'status': 'Error',
             'error': err.toString(),
             'stackTrace': st.toString(),
           };

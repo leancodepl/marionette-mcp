@@ -175,7 +175,7 @@ class VmServiceConnector {
       _logger.finest('Extension response: $responseJson');
 
       // Check if the response indicates an error
-      if (responseJson['type'] == 'Error') {
+      if (responseJson['status'] == 'Error') {
         throw VmServiceExtensionException(
           'Extension $extensionName failed',
           responseJson['error'] as String?,
