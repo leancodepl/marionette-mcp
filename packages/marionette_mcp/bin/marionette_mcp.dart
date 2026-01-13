@@ -76,6 +76,18 @@ Future<int> main(List<String> arguments) async {
         capabilities: ServerCapabilities(
           tools: ServerCapabilitiesTools(),
         ),
+        instructions: '''
+Marionette MCP enables AI agents to interact with Flutter apps running in debug mode. It provides tools to inspect UI elements, tap buttons, enter text, scroll, take screenshots, and retrieve logs.
+
+Usage:
+1. Start the Flutter app in debug mode and note the VM service URI (e.g., ws://127.0.0.1:8181/ws).
+2. Use the "connect" tool with the VM service URI to establish a connection.
+3. Use "get_interactive_elements" to discover available UI elements.
+4. Interact with elements using "tap", "enter_text", or "scroll_to" tools.
+5. Use "take_screenshots" to see the current app state and "get_logs" to debug issues.
+
+Important: Elements are matched by their key (ValueKey<String>) or text content. Keys are more reliable. If you cannot locate a widget, you may need to add a ValueKey to it in the Flutter source code. For example: `ElevatedButton(key: ValueKey('submit_button'), ...)`.
+''',
       ),
     );
 

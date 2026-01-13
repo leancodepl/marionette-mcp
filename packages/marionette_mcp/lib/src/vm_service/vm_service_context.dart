@@ -134,7 +134,7 @@ final class VmServiceContext {
       ..registerTool(
         'tap',
         description:
-            'Simulates a tap gesture on an element in the Flutter app that matches the given criteria. You can match elements by their key (a ValueKey<String>) or by their text content (but not accessibility!). Only one of key or text should be provided. Prefer using the key if available, as it is more reliable. Limit yourself to elements from get_interactive_elements only if you can. Requires an active connection established via connect.',
+            'Simulates a tap gesture on an element in the Flutter app that matches the given criteria. You can match elements by their key (a ValueKey<String>), by their text content (but not accessibility!), or by their widget type. Only one of key, text, or type should be provided. Prefer using the key if available, as it is more reliable. Limit yourself to elements from get_interactive_elements only if you can. Requires an active connection established via connect.',
         annotations: const ToolAnnotations(
           title: 'Tap Element',
         ),
@@ -147,6 +147,10 @@ final class VmServiceContext {
             'text': JsonSchema.string(
               description:
                   'The visible text content of the element to tap. Use this for elements that display text like buttons or labels.',
+            ),
+            'type': JsonSchema.string(
+              description:
+                  'The widget type name of the element to tap (e.g., "ElevatedButton", "IconButton"). Use this to match elements by their Flutter widget type.',
             ),
           },
         ),
@@ -372,6 +376,9 @@ final class VmServiceContext {
     }
     if (args.containsKey('text')) {
       matcher['text'] = args['text'];
+    }
+    if (args.containsKey('type')) {
+      matcher['type'] = args['type'];
     }
     return matcher;
   }

@@ -9,16 +9,18 @@ sealed class WidgetMatcher {
   bool matches(Widget widget, MarionetteConfiguration configuration);
 
   /// Creates a matcher from a JSON map.
-  /// If both 'key' and 'text' fields are present, 'key' takes precedence.
+  /// If multiple fields are present, precedence is: 'key' > 'text' > 'type'.
   static WidgetMatcher fromJson(Map<String, dynamic> json) {
-    // Key has precedence over text
+    // Key has precedence over text, text has precedence over type
     if (json.containsKey('key')) {
       return KeyMatcher.fromJson(json);
     } else if (json.containsKey('text')) {
       return TextMatcher.fromJson(json);
+    } else if (json.containsKey('type')) {
+      return TypeStringMatcher.fromJson(json);
     } else {
       throw ArgumentError(
-        'Matcher JSON must contain either "key" or "text" field',
+        'Matcher JSON must contain either "key", "text", or "type" field',
       );
     }
   }
@@ -88,5 +90,26 @@ class TypeMatcher extends WidgetMatcher {
   @override
   Map<String, dynamic> toJson() {
     throw UnsupportedError('TypeMatcher does not support JSON serialization');
+  }
+}
+
+/// Matches widgets by their runtime type as a string.
+class TypeStringMatcher extends WidgetMatcher {
+  const TypeStringMatcher(this.typeName);
+
+  factory TypeStringMatcher.fromJson(Map<String, dynamic> json) {
+    return TypeStringMatcher(json['type'] as String);
+  }
+
+  final String typeName;
+
+  @override
+  bool matches(Widget widget, MarionetteConfiguration configuration) {
+    return widget.runtimeType.toString() == typeName;
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{'type': typeName};
   }
 }
