@@ -26,8 +26,7 @@ class MarionetteBinding extends WidgetsFlutterBinding {
   }
 
   /// The singleton instance of [MarionetteBinding].
-  static MarionetteBinding get instance =>
-      BindingBase.checkInstance(_instance);
+  static MarionetteBinding get instance => BindingBase.checkInstance(_instance);
   static MarionetteBinding? _instance;
 
   MarionetteBinding._(this.configuration);
@@ -202,5 +201,11 @@ class MarionetteBinding extends WidgetsFlutterBinding {
         }
       },
     );
+  }
+
+  @override
+  Future<void> reassembleApplication() {
+    _logCollector.clear();
+    return super.reassembleApplication();
   }
 }

@@ -2,7 +2,7 @@
   "mcpServers": {
     "marionette": {
       "type": "stdio",
-      "command": "dart run packages/marionette_mcp/bin/marionette_mcp.dart -l FINEST"
+      "command": "dart run ${workspaceFolder}/packages/marionette_mcp/bin/marionette_mcp.dart -l FINEST"
     }
   }
 }

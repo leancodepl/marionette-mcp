@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:marionette_flutter/marionette_flutter.dart';
 
 void main() {
   MarionetteBinding.ensureInitialized(const MarionetteConfiguration());
+
+  Logger.root.level = Level.ALL;
+  Logger.root.onRecord.listen((record) {
+    // ignore: avoid_print
+    print('${record.level.name}: ${record.time}: ${record.message}');
+  });
+
   runApp(const MyApp());
 }
 
@@ -56,9 +64,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final _logger = Logger('MyHomePage');
+
   int _counter = 0;
 
   void _incrementCounter() {
+    _logger.info('Incrementing counter, from $_counter');
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
