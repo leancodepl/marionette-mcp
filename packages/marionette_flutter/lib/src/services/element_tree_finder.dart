@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:marionette_flutter/src/binding/marionette_configuration.dart';
 
@@ -54,14 +55,23 @@ class ElementTreeFinder {
       return null;
     }
 
-    final data = <String, dynamic>{'type': widget.runtimeType.toString()};
+    final properties = DiagnosticPropertiesBuilder();
+    widget.debugFillProperties(properties);
+    final data = Map<String, Object>.fromEntries(
+      properties.properties
+          .where((p) =>
+              p.runtimeType != DiagnosticsProperty &&
+              p.name != null &&
+              p.value != null)
+          .map(
+            (p) => MapEntry(p.name!, p.value.toString()),
+          ),
+    );
+
+    data['type'] = widget.runtimeType.toString();
 
     if (keyValue != null) {
       data['key'] = keyValue;
-    }
-
-    if (text != null) {
-      data['text'] = text;
     }
 
     // Get position and size if available
