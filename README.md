@@ -228,6 +228,14 @@ Marionette MCP shines when used by coding agents to verify their work or explore
 3. **Interaction**: When an AI agent calls a tool (like `tap`), the MCP server translates this into a call to the corresponding VM service extension in your app.
 4. **Execution**: The Flutter app executes the action (e.g., simulates a tap gesture) and returns the result.
 
+## Assumptions & Limitations
+
+- **Prefer pasting the VM Service URI manually**: While some tooling can sometimes discover or infer the VM Service endpoint, the most reliable workflow is to copy the `ws://.../ws` URI from your `flutter run` output (or DevTools link) and paste it to the agent when calling `connect`.
+
+- **The agent may not know your app**: Marionette can “see” the widget tree and interact with UI elements, but it doesn’t automatically understand your product’s flows, naming conventions, or edge cases. If you want reliable navigation and assertions, provide extra context in the prompt (what screen to reach, expected labels/keys, preconditions, and the goal of the interaction).
+
+- **“Your mileage may vary” interactions**: Some actions are implemented via best-effort simulation of user behavior (gestures, focus, text entry, scrolling). Depending on platform, custom widgets, overlays, or app-specific gesture handling, results may vary. If a flow is flaky, consider exposing clearer widget keys, simplifying hit targets, or adding custom `MarionetteConfiguration` hooks for your design system. And if you hit something that consistently doesn’t behave as expected, a small repro in an issue helps us improve it.
+
 ## Troubleshooting
 
 - **"Not connected to any app"**: Ensure the AI agent has called `connect` with the valid VM Service URI before using other tools.
