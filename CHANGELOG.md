@@ -1,3 +1,8 @@
+# 0.2.2
+
+- Add compatibility for Copilot `initialize` call
+- Make configuration parameter optional in `MarionetteBinding.ensureInitialized()`
+
 # 0.2.1
 
 - Update README
