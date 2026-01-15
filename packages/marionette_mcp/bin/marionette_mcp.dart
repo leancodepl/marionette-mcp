@@ -4,10 +4,9 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:marionette_mcp/src/compat/copilot_stdio_server_transport.dart';
+import 'package:marionette_mcp/src/version.g.dart';
 import 'package:marionette_mcp/src/vm_service/vm_service_context.dart';
 import 'package:mcp_dart/mcp_dart.dart';
-
-const version = '0.1.0';
 
 ArgParser buildParser() {
   return ArgParser()

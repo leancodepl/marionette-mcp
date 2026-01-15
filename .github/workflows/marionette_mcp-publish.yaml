@@ -22,6 +22,14 @@ jobs:
         with:
           sdk: stable
 
+      - name: Validate version.g.dart
+        run: |
+          dart tool/generate_version.dart
+          if ! git diff --exit-code packages/marionette_mcp/lib/src/version.g.dart; then
+            echo "ERROR: version.g.dart is out of sync. Please run 'dart tool/generate_version.dart' and commit the changes."
+            exit 1
+          fi
+
       - name: Publish to pub.dev
         uses: leancodepl/mobile-tools/.github/actions/pub-release@pub-release-v1
         with:
