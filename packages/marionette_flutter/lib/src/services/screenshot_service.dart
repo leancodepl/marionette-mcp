@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
@@ -6,6 +7,10 @@ import 'package:flutter/widgets.dart';
 
 /// Service for taking screenshots of the main app view using RenderView layers.
 class ScreenshotService {
+  ScreenshotService({this.maxScreenshotSize});
+
+  final Size? maxScreenshotSize;
+
   /// Takes screenshots of all RenderViews in the app.
   ///
   /// This method attempts to capture the current state of all views
@@ -37,6 +42,26 @@ class ScreenshotService {
         .toList();
 
     return images;
+  }
+
+  @visibleForTesting
+  static Size? calculateScaledSize(Size source, Size maxSize) {
+    if (source.width <= maxSize.width && source.height <= maxSize.height) {
+      return null;
+    }
+
+    final scale = math.min(
+      maxSize.width / source.width,
+      maxSize.height / source.height,
+    );
+
+    if (scale <= 0) {
+      return null;
+    }
+
+    final targetWidth = math.max(1, (source.width * scale).floor());
+    final targetHeight = math.max(1, (source.height * scale).floor());
+    return Size(targetWidth.toDouble(), targetHeight.toDouble());
   }
 
   /// Takes a screenshot of a single RenderView.
@@ -80,6 +105,7 @@ class ScreenshotService {
     final builder = ui.SceneBuilder();
     ui.Scene? scene;
     ui.Image? image;
+    ui.Image? resizedImage;
 
     try {
       // The offset is zero because we want to capture the entire view from its origin.
@@ -102,8 +128,23 @@ class ScreenshotService {
 
       image = await scene.toImage(width, height);
 
+      final targetSize = maxScreenshotSize == null
+          ? null
+          : calculateScaledSize(
+              Size(width.toDouble(), height.toDouble()),
+              maxScreenshotSize!,
+            );
+
+      if (targetSize != null) {
+        resizedImage = await _resizeImage(image, targetSize);
+      }
+
+      final imageToEncode = resizedImage ?? image;
+
       // Convert to PNG byte data.
-      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final byteData = await imageToEncode.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
 
       if (byteData != null) {
         final pngBytes = byteData.buffer.asUint8List();
@@ -124,9 +165,38 @@ class ScreenshotService {
       return null;
     } finally {
       // Dispose image immediately after use.
+      resizedImage?.dispose();
       image?.dispose();
       // Ensure scene is always disposed.
       scene?.dispose();
     }
+  }
+
+  Future<ui.Image> _resizeImage(ui.Image image, Size targetSize) async {
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
+    final paint = ui.Paint()..filterQuality = ui.FilterQuality.high;
+    final srcRect = ui.Rect.fromLTWH(
+      0,
+      0,
+      image.width.toDouble(),
+      image.height.toDouble(),
+    );
+    final dstRect = ui.Rect.fromLTWH(
+      0,
+      0,
+      targetSize.width,
+      targetSize.height,
+    );
+
+    canvas.drawImageRect(image, srcRect, dstRect, paint);
+
+    final picture = recorder.endRecording();
+    final resizedImage = await picture.toImage(
+      targetSize.width.round(),
+      targetSize.height.round(),
+    );
+    picture.dispose();
+    return resizedImage;
   }
 }

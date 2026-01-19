@@ -53,7 +53,9 @@ class MarionetteBinding extends WidgetsFlutterBinding {
     _elementTreeFinder = ElementTreeFinder(configuration);
     _gestureDispatcher = GestureDispatcher();
     _logCollector = LogCollector();
-    _screenshotService = ScreenshotService();
+    _screenshotService = ScreenshotService(
+      maxScreenshotSize: configuration.maxScreenshotSize,
+    );
     _scrollSimulator = ScrollSimulator(_gestureDispatcher, _widgetFinder);
     _textInputSimulator = TextInputSimulator(_widgetFinder);
 

@@ -132,6 +132,12 @@ void main() {
 }
 ```
 
+#### Screenshot sizing
+
+By default, Marionette will downscale screenshots to fit within 2000×2000
+physical pixels. You can override this via `maxScreenshotSize` in
+`MarionetteConfiguration` (set it to `null` to disable resizing).
+
 ## Tool Configuration
 
 Add the MCP server to your AI coding assistant's configuration.

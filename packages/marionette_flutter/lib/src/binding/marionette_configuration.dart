@@ -9,6 +9,7 @@ class MarionetteConfiguration {
     this.isInteractiveWidget,
     this.shouldStopTraversal,
     this.extractText,
+    this.maxScreenshotSize = const Size(2000, 2000),
   });
 
   /// Determines if an app-specific widget type is interactive.
@@ -29,6 +30,12 @@ class MarionetteConfiguration {
   /// This is called only after checking built-in Flutter widgets.
   /// Return the text content of your custom widgets, or null if not applicable.
   final String? Function(Widget widget)? extractText;
+
+  /// Maximum size for screenshots in physical pixels.
+  ///
+  /// If set, captured screenshots will be downscaled to fit within this size
+  /// while preserving aspect ratio. Set to null to disable resizing.
+  final Size? maxScreenshotSize;
 
   /// Checks if a widget type is interactive (built-in + custom).
   bool isInteractiveWidgetType(Type type) {
