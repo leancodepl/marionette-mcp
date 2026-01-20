@@ -196,8 +196,8 @@ class _ExitSignal {
     // SIGTERM is not supported on Windows, only listen on non-Windows platforms
     if (!Platform.isWindows) {
       _sigtermSubscription = ProcessSignal.sigterm.watch().listen(
-        _handleSignal,
-      );
+            _handleSignal,
+          );
     }
     _sigintSubscription = ProcessSignal.sigint.watch().listen(_handleSignal);
   }
