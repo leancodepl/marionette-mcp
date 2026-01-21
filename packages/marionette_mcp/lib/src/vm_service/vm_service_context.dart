@@ -7,8 +7,8 @@ import 'package:mcp_dart/mcp_dart.dart';
 /// Context for managing VM service connection and registering MCP tools.
 final class VmServiceContext {
   VmServiceContext()
-      : connector = VmServiceConnector(),
-        _logger = logging.Logger('VmServiceContext');
+    : connector = VmServiceConnector(),
+      _logger = logging.Logger('VmServiceContext');
 
   final VmServiceConnector connector;
   final logging.Logger _logger;
@@ -21,9 +21,7 @@ final class VmServiceContext {
         'connect',
         description:
             'Connects to a Flutter app via its VM service URI. This must be called before using any other tools. The VM service URI is typically in the format ws://127.0.0.1:PORT/ws and can be found in the Flutter app output when running in debug mode.',
-        annotations: const ToolAnnotations(
-          title: 'Connect to App',
-        ),
+        annotations: const ToolAnnotations(title: 'Connect to App'),
         inputSchema: ToolInputSchema(
           properties: {
             'uri': JsonSchema.string(
@@ -48,11 +46,7 @@ final class VmServiceContext {
             _logger.severe('Failed to connect to app', err);
             return CallToolResult(
               isError: true,
-              content: [
-                TextContent(
-                  text: 'Failed to connect to app: $err',
-                ),
-              ],
+              content: [TextContent(text: 'Failed to connect to app: $err')],
             );
           }
         },
@@ -61,9 +55,7 @@ final class VmServiceContext {
         'disconnect',
         description:
             'Disconnects from the currently connected Flutter app. After disconnecting, you must call connect again to use any other tools.',
-        annotations: const ToolAnnotations(
-          title: 'Disconnect from App',
-        ),
+        annotations: const ToolAnnotations(title: 'Disconnect from App'),
         inputSchema: const ToolInputSchema(properties: {}),
         callback: (args, extra) async {
           _logger.info('Disconnecting from app');
@@ -79,11 +71,7 @@ final class VmServiceContext {
             _logger.severe('Error during disconnect', err);
             return CallToolResult(
               isError: true,
-              content: [
-                TextContent(
-                  text: 'Error during disconnect: $err',
-                ),
-              ],
+              content: [TextContent(text: 'Error during disconnect: $err')],
             );
           }
         },
@@ -115,17 +103,13 @@ final class VmServiceContext {
             }
 
             return CallToolResult(
-              content: [
-                TextContent(text: buffer.toString()),
-              ],
+              content: [TextContent(text: buffer.toString())],
             );
           } catch (err) {
             _logger.warning('Failed to get interactive elements', err);
             return CallToolResult(
               isError: true,
-              content: [
-                TextContent(text: err.toString()),
-              ],
+              content: [TextContent(text: err.toString())],
             );
           }
         },
@@ -135,9 +119,7 @@ final class VmServiceContext {
         'tap',
         description:
             'Simulates a tap gesture on an element in the Flutter app that matches the given criteria. You can match elements by their key (a ValueKey<String>), by their text content (but not accessibility!), by their widget type, or by screen coordinates. Only one matching method should be used: either key, text, type, or coordinates. Prefer using the key if available, as it is more reliable. Limit yourself to elements from get_interactive_elements only if you can. Requires an active connection established via connect.',
-        annotations: const ToolAnnotations(
-          title: 'Tap Element',
-        ),
+        annotations: const ToolAnnotations(title: 'Tap Element'),
         inputSchema: ToolInputSchema(
           properties: {
             'key': JsonSchema.string(
@@ -177,19 +159,13 @@ final class VmServiceContext {
             final message = response['message'] as String?;
 
             return CallToolResult(
-              content: [
-                TextContent(
-                  text: message ?? 'Successfully tapped',
-                ),
-              ],
+              content: [TextContent(text: message ?? 'Successfully tapped')],
             );
           } catch (err) {
             _logger.warning('Failed to tap', err);
             return CallToolResult(
               isError: true,
-              content: [
-                TextContent(text: err.toString()),
-              ],
+              content: [TextContent(text: err.toString())],
             );
           }
         },
@@ -199,9 +175,7 @@ final class VmServiceContext {
         'enter_text',
         description:
             'Enters text into a text field in the Flutter app that matches the given criteria. This simulates typing text into the field. Requires an active connection established via connect.',
-        annotations: const ToolAnnotations(
-          title: 'Enter Text',
-        ),
+        annotations: const ToolAnnotations(title: 'Enter Text'),
         inputSchema: ToolInputSchema(
           properties: {
             'input': JsonSchema.string(
@@ -225,18 +199,14 @@ final class VmServiceContext {
 
             return CallToolResult(
               content: [
-                TextContent(
-                  text: message ?? 'Successfully entered text',
-                ),
+                TextContent(text: message ?? 'Successfully entered text'),
               ],
             );
           } catch (err) {
             _logger.warning('Failed to enter text', err);
             return CallToolResult(
               isError: true,
-              content: [
-                TextContent(text: err.toString()),
-              ],
+              content: [TextContent(text: err.toString())],
             );
           }
         },
@@ -246,9 +216,7 @@ final class VmServiceContext {
         'scroll_to',
         description:
             'Scrolls the view until an element matching the given criteria becomes visible. You can match elements by their key (a ValueKey<String>) or by their visible text content. This is useful when you need to interact with elements that are not currently visible on screen. Requires an active connection established via connect.',
-        annotations: const ToolAnnotations(
-          title: 'Scroll to Element',
-        ),
+        annotations: const ToolAnnotations(title: 'Scroll to Element'),
         inputSchema: ToolInputSchema(
           properties: {
             'key': JsonSchema.string(
@@ -280,9 +248,7 @@ final class VmServiceContext {
             _logger.warning('Failed to scroll to element', err);
             return CallToolResult(
               isError: true,
-              content: [
-                TextContent(text: err.toString()),
-              ],
+              content: [TextContent(text: err.toString())],
             );
           }
         },
@@ -307,33 +273,28 @@ final class VmServiceContext {
 
             if (count == 0) {
               return CallToolResult(
-                content: [
-                  const TextContent(text: 'No logs collected'),
-                ],
+                content: [const TextContent(text: 'No logs collected')],
               );
             }
 
             // Format logs nicely
             final buffer = StringBuffer()
               ..writeln(
-                  'Collected $count log entr${count == 1 ? 'y' : 'ies'}:\n');
+                'Collected $count log entr${count == 1 ? 'y' : 'ies'}:\n',
+              );
 
             for (final log in logs) {
               buffer.writeln(log);
             }
 
             return CallToolResult(
-              content: [
-                TextContent(text: buffer.toString()),
-              ],
+              content: [TextContent(text: buffer.toString())],
             );
           } catch (err) {
             _logger.warning('Failed to get logs', err);
             return CallToolResult(
               isError: true,
-              content: [
-                TextContent(text: err.toString()),
-              ],
+              content: [TextContent(text: err.toString())],
             );
           }
         },
@@ -353,29 +314,28 @@ final class VmServiceContext {
 
           try {
             final response = await connector.takeScreenshots();
-            final screenshots =
-                (response['screenshots'] as List<dynamic>).cast<String>();
+            final screenshots = (response['screenshots'] as List<dynamic>)
+                .cast<String>();
 
             if (screenshots.isEmpty) {
               return CallToolResult(
-                content: [
-                  const TextContent(text: 'No screenshots captured'),
-                ],
+                content: [const TextContent(text: 'No screenshots captured')],
               );
             } else {
               return CallToolResult(
-                  content: screenshots
-                      .map((screenshot) =>
-                          ImageContent(data: screenshot, mimeType: 'image/png'))
-                      .toList());
+                content: screenshots
+                    .map(
+                      (screenshot) =>
+                          ImageContent(data: screenshot, mimeType: 'image/png'),
+                    )
+                    .toList(),
+              );
             }
           } catch (err) {
             _logger.warning('Failed to take screenshots', err);
             return CallToolResult(
               isError: true,
-              content: [
-                TextContent(text: err.toString()),
-              ],
+              content: [TextContent(text: err.toString())],
             );
           }
         },
@@ -385,9 +345,7 @@ final class VmServiceContext {
         'hot_reload',
         description:
             'Performs a hot reload of the Flutter app. This reloads the Dart code without restarting the app, preserving the current state. Useful after making code changes to see them reflected in the running app. Requires an active connection established via connect.',
-        annotations: const ToolAnnotations(
-          title: 'Hot Reload',
-        ),
+        annotations: const ToolAnnotations(title: 'Hot Reload'),
         inputSchema: const ToolInputSchema(properties: {}),
         callback: (args, extra) async {
           _logger.info('Performing hot reload');
@@ -398,9 +356,7 @@ final class VmServiceContext {
             if (report.success ?? false) {
               return CallToolResult(
                 content: [
-                  const TextContent(
-                    text: 'Hot reload completed successfully',
-                  ),
+                  const TextContent(text: 'Hot reload completed successfully'),
                 ],
               );
             } else {
@@ -418,9 +374,7 @@ final class VmServiceContext {
             _logger.warning('Failed to perform hot reload', err);
             return CallToolResult(
               isError: true,
-              content: [
-                TextContent(text: 'Hot reload failed: $err'),
-              ],
+              content: [TextContent(text: 'Hot reload failed: $err')],
             );
           }
         },

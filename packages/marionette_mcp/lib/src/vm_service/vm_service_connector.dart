@@ -227,9 +227,7 @@ class VmServiceConnector {
   ///
   /// [matcher] should contain either 'key' or 'text' field.
   /// Throws [NotConnectedException] if not connected.
-  Future<Map<String, dynamic>> scrollToElement(
-    Map<String, dynamic> matcher,
-  ) {
+  Future<Map<String, dynamic>> scrollToElement(Map<String, dynamic> matcher) {
     return _callExtension('marionette.scrollTo', matcher);
   }
 
@@ -297,8 +295,10 @@ class VmServiceConnector {
 
       try {
         final isolate = await _service!.getIsolate(isolateRef.id!);
-        final hasExtension = isolate.extensionRPCs
-                ?.any((ext) => ext == 'ext.flutter.marionette.getLogs') ??
+        final hasExtension =
+            isolate.extensionRPCs?.any(
+              (ext) => ext == 'ext.flutter.marionette.getLogs',
+            ) ??
             false;
 
         if (hasExtension) {
