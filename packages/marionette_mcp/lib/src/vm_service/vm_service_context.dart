@@ -393,9 +393,9 @@ final class VmServiceContext {
           _logger.info('Performing hot reload');
 
           try {
-            final report = await connector.hotReload();
+            final reloaded = await connector.hotReload();
 
-            if (report.success ?? false) {
+            if (reloaded) {
               return CallToolResult(
                 content: [
                   const TextContent(
@@ -408,8 +408,7 @@ final class VmServiceContext {
                 isError: true,
                 content: [
                   TextContent(
-                    text:
-                        'Hot reload failed. The app may need a full restart ${jsonEncode(report.json)}.',
+                    text: 'Hot reload failed. The app may need a full restart.',
                   ),
                 ],
               );
