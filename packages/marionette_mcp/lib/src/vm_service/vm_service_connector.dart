@@ -250,7 +250,7 @@ class VmServiceConnector {
   ///
   /// Returns information about the reload result.
   /// Throws [NotConnectedException] if not connected.
-  Future<ReloadReport> hotReload() async {
+  Future<bool> hotReload() async {
     _ensureConnected();
 
     _logger.info('Performing hot reload');
@@ -260,17 +260,14 @@ class VmServiceConnector {
       if (method == null) {
         final report = await _service!.reloadSources(_isolateId!);
         _logger.fine('Hot reload completed: success=${report.success}');
-        return report;
+        return report.success ?? false;
       } else {
         final result = await _service!.callMethod(
           method,
           isolateId: _isolateId!,
         );
-        if (result.json case final json?) {
-          return ReloadReport.parse(json) ?? ReloadReport(success: false);
-        } else {
-          return ReloadReport(success: false);
-        }
+        _logger.fine('Hot reload completed: result=${result.json}');
+        return result.json?['type'] == 'Success';
       }
     } catch (err) {
       _logger.severe('Hot reload failed', err);
