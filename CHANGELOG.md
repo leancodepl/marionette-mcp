@@ -1,3 +1,11 @@
+# 0.3.0
+
+- Add screenshot resizing configuration
+- Fix SIGTERM handling on Windows
+- Add GitHub Copilot support
+- Require Dart 3.10 for the MCP server
+- Fix `hot_reload` tool response handling
+
 # 0.2.4
 
 - Add CI workflow with analyze, format, and version checks
