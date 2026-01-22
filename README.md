@@ -9,13 +9,15 @@
 
 **"Playwright MCP/Cursor Browser, but for Flutter apps"**
 
-Marionette MCP enables AI agents (like Cursor, Claude Code, etc.) to inspect and interact with running Flutter applications. It provides a bridge between the MCP protocol and the Flutter VM service, allowing agents to see the widget tree, tap elements, enter text, scroll, and capture screenshots for automated smoke testing and interaction.
+Marionette MCP enables AI agents (like Cursor, Claude Code, etc.) to inspect and interact with running Flutter applications. It connects your agent directly to a running app, so it can see the widget tree, tap elements, enter text, scroll, and capture screenshots for automated smoke testing and interaction.
+
+Marionette MCP keeps the surface area intentionally small. It exposes only a handful of high-signal actions and returns the minimum actionable data, which helps keep prompts focused and context sizes under control.
 
 ![](https://github.com/leancodepl/marionette_mcp_attachments/blob/master/promo.gif)
 
 ## Marionette MCP vs Flutter MCP
 
-The official [Dart & Flutter MCP server](https://docs.flutter.dev/ai/mcp-server) focuses on **development-time** tasks: searching pub.dev, managing dependencies, analyzing code, and inspecting runtime errors. Marionette MCP is complementary - it focuses on **runtime interaction**: tapping buttons, entering text, scrolling, and taking screenshots. Use Flutter MCP to build your app, use Marionette MCP to test and interact with it.
+The official [Dart & Flutter MCP server](https://docs.flutter.dev/ai/mcp-server) focuses on **development-time** tasks: searching pub.dev, managing dependencies, analyzing code, and inspecting runtime errors. It can also drive the UI, but it does so through Flutter Driver, which introduces extra instrumentation in your app. Marionette MCP focuses solely (and in an opinionated way) on **runtime interaction**: tapping buttons, entering text, scrolling, and taking screenshots, while requiring minimal changes to your app. Use Flutter MCP to build your app, use Marionette MCP to test and interact with it with minimal code changes.
 
 ## Quick Start
 
@@ -198,6 +200,7 @@ claude mcp add --transport stdio marionette -- marionette_mcp
 ```
 
 ### Copilot
+
 Add to your `mcp.json`:
 
 ```json
